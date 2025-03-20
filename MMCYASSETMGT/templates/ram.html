@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAM Usage</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <canvas id="ramChart" width="400" height="400"></canvas>
+    <script>
+        let chart = null;
+        
+        function fetchAndUpdate() {
+            fetch("/api/performance/")
+            .then(response => response.json())
+            .then(data => {
+                const labels = data.map(item => item.id);
+                const values = data.map(item => item.ram_free);
+                console.log(values);
+                
+                const backgroundColors = values.map(value => value < 1000 ? 'red' : 'green');
+                
+                if (chart) {
+                    chart.data.labels = labels;
+                    chart.data.datasets[0].data = values;
+                    chart.data.datasets[0].backgroundColor = backgroundColors;
+                    chart.update();
+                } else {
+                    const ctx = document.getElementById("ramChart").getContext('2d');
+                    chart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'RAM Usage (MB)',
+                                data: values,
+                                backgroundColor: backgroundColors,
+                                borderColor: 'black',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Endpoint device ID'
+                                    },
+                                    ticks: {
+                                        autoSkip: false,
+                                        maxRotation: 45,
+                                        minRotation: 45
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'RAM Available (MB)'
+                                    },
+                                    beginAtZero: true,
+                                    max: 16000 // Assuming max RAM usage display limit is 16GB
+                                }
+                            }
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error fetching data:', error));
+        }
+
+        fetchAndUpdate();
+        setInterval(fetchAndUpdate, 1000);
+    </script>
+</body>
+</html>

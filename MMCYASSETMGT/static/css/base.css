@@ -1,0 +1,17 @@
+* {
+    box-sizing: border-box;
+}
+html, body {
+    height: 100%;
+  }
+
+  body {
+    display: flex; /* Enable flex layout */
+    flex-direction: column; /* Stack children vertically */
+  }
+  .content {
+    flex: 1 0 auto; /* Grow to fill available space, but don't shrink past content size */
+  }
+  .footer {
+    flex-shrink: 0; /*  Don't let the footer shrink */
+  }

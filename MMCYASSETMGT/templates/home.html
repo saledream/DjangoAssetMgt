@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block style %}
+     <style>
+        /* Shadow Effect Underneath */
+        .stage {
+            box-shadow: 0px 20px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 10;
+        }
+        .stage::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: -15px;
+            width: 80%;
+            height: 15px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 50%;
+            filter: blur(10px); /* Blurred shadow effect */
+            transform: translateX(-50%);
+            z-index: -1; /* Puts it behind the div */
+        }
+        .content {
+         margin-top: -30px; /* Makes content "flow" under the stage */
+         padding: 20px;
+         background: #f8f9fa;
+         border-radius: 8px;
+         box-shadow: inset 0px 5px 10px rgba(0, 0, 0, 0.05);
+     }
+     </style>
+{% endblock %}
+{% block content %}
+   <section class="stage bg-dark text-white text-center py-3">
+      <div id="chart-container"
+           hx-get="{% url 'performance' %}"
+           hx-trigger="load"
+           hx-target="#chart-container"
+           hx-swap="outerHTML">
+         <p>Loading performance data ... </p>
+      </div>
+   </section>
+   <section>
+      <div id="device-list-container content"
+           hx-trigger="load"
+           hx-target="#chart-container"
+           hx-swap="outerHTML">
+             <p> Loading devices </p>
+           </div>
+   </section>
+{% endblock %}

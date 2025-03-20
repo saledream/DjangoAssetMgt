@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+    <canvas id="salesChart" width="400" height="400"></canvas>
+    <script>
+        let chart = null ;
+        // function to fetch data and update chart
+        function fetchAndUpdate() {
+            fetch("/api/performance/")
+            .then(response => response.json())
+            .then(data => {
+                const labels = data.map(item => item.id);
+                const values = data.map(item => item.cpu_usage);
+                console.log(values);
+                const backgroundColors = values.map(value => {
+
+                    if(value < 50){
+                        return 'green';   // if value is below 50, set green
+                    }
+                    else if (value >= 50 && value <= 80) {
+                        return 'orange';     // if value is between 50 and 80, set orange
+                    }
+                    else {
+                        return 'red';    // if value is above 80, set red
+                    }
+                });
+               if (chart) {
+                    chart.data.labels = labels;
+                    chart.data.datasets[0].data = values;
+                    chart.data.datasets[0].backgroundColor = backgroundColors;
+                    chart.update();
+                   
+                }
+                else {
+                    // create the chart if not already created
+                const ctx = document.getElementById("salesChart").getContext('2d');
+                chart = new Chart(ctx, {
+                    type:'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Disk_usage',
+                            data: values,
+                            backgroundColor: backgroundColors,
+                            borderColor: 'black',
+                            borderWidth: 1
+
+                        }]
+                    },
+                    options: {
+                        reponsive: true,
+                        maintainAspectRatio: false,
+                        scales:{
+                            x: {
+                                ticks:{
+                                    autoSkip: false,
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            },
+                            y:{
+                                beginAtZero: true,
+                                max: 100     // Setting the max y-axis value to 100 
+
+                            }
+                        }
+                    }
+                });
+               }
+            })
+            .catch(error => console.error('Error Fetching data:',error));       
+        }
+
+        // Inital fetch to populate chart immediately 
+        fetchAndUpdate();
+
+        //fetch and update every  seconds
+        setInterval(fetchAndUpdate, 1000);
+        
+    </script>  
+</body>
+</html>

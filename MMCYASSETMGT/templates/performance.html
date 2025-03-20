@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Performance</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        canvas {
+            max-width: 600px;
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <canvas id="cpuChart"></canvas>
+        <canvas id="ramChart"></canvas>
+        <canvas id="diskChart"></canvas>
+    </div>
+    <script>
+        let cpuChart = null;
+        let ramChart = null;
+        let diskChart = null;
+
+        function fetchAndUpdate() {
+            fetch("/api/performance/")
+            .then(response => response.json())
+            .then(data => {
+                const labels = data.map(item => item.id);
+                
+                // CPU Usage
+                const cpuValues = data.map(item => item.cpu_usage);
+                const cpuColors = cpuValues.map(value => value < 50 ? 'green' : value <= 80 ? 'orange' : 'red');
+                updateChart("cpuChart", cpuChart, labels, cpuValues, cpuColors, "CPU Usage (%)", 100);
+                
+                // // RAM Usage
+                // const ramValues = data.map(item => item.ram_usage);
+                // const ramColors = ramValues.map(value => value < 1000 ? 'red' : 'green');
+                // updateChart("ramChart", ramChart, labels, ramValues, ramColors, "RAM Available (MB)", 16000);
+                
+                // // Disk Usage
+                // const diskValues = data.map(item => item.disk_usage);
+                // const diskColors = diskValues.map(value => value < 10000 ? 'red' : 'green');
+                // updateChart("diskChart", diskChart, labels, diskValues, diskColors, "Disk Available (MB)", 300000,0, 10000);
+            })
+            .catch(error => console.error('Error fetching data:', error));
+        }
+
+        function updateChart(canvasId, chartInstance, labels, values, colors, label, max, min = 0, stepSize = null) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            if (cpuChart) {
+                chartInstance.data.labels = labels;
+                chartInstance.data.datasets[0].data = values;
+                chartInstance.data.datasets[0].backgroundColor = colors;
+                chartInstance.update();
+            } else {
+                cpuChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: values,
+                            backgroundColor: colors,
+                            borderColor: 'black',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Endpoints'
+                                },
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: label
+                                },
+                                beginAtZero: true,
+                                min: min,
+                                max: max,
+                                ticks: stepSize ? { stepSize: stepSize } : {}
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        fetchAndUpdate();
+        setInterval(fetchAndUpdate, 1000);
+        // for disk 
+        function diskfetchAndUpdate() {
+            fetch("/api/performance/")
+            .then(response => response.json())
+            .then(data => {
+                const labels = data.map(item => item.id);
+                
+                
+                // // RAM Usage
+                // const ramValues = data.map(item => item.ram_usage);
+                // const ramColors = ramValues.map(value => value < 1000 ? 'red' : 'green');
+                // updateChart("ramChart", ramChart, labels, ramValues, ramColors, "RAM Available (MB)", 16000);
+                
+                // Disk Usage
+                const diskValues = data.map(item => item.disk_free);
+                const diskColors = diskValues.map(value => value < 10000 ? 'red' : 'green');
+                updateDiskChart("diskChart", diskChart, labels, diskValues, diskColors, "Disk Available (MB)", 300000,0, 10000);
+            })
+            .catch(error => console.error('Error fetching data:', error));
+        }
+
+        function updateDiskChart(canvasId, chartInstance, labels, values, colors, label, max, min = 0, stepSize = null) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            if (diskChart) {
+                chartInstance.data.labels = labels;
+                chartInstance.data.datasets[0].data = values;
+                chartInstance.data.datasets[0].backgroundColor = colors;
+                chartInstance.update();
+            } else {
+                diskChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: values,
+                            backgroundColor: colors,
+                            borderColor: 'black',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Endpoints'
+                                },
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: label
+                                },
+                                beginAtZero: true,
+                                min: min,
+                                max: max,
+                                ticks: stepSize ? { stepSize: stepSize } : {}
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        diskfetchAndUpdate();
+        setInterval(diskfetchAndUpdate, 1000);
+       // for ram
+        function ramfetchAndUpdate() {
+            fetch("/api/performance/")
+            .then(response => response.json())
+            .then(data => {
+                const labels = data.map(item => item.id);
+                
+               
+                
+                // RAM Usage
+                const ramValues = data.map(item => item.ram_free);
+                const ramColors = ramValues.map(value => value < 1000 ? 'red' : 'green');
+                updateRamChart("ramChart", ramChart, labels, ramValues, ramColors, "RAM Available (MB)", 16000);
+                
+                
+            })
+            .catch(error => console.error('Error fetching data:', error));
+        }
+
+        function updateRamChart(canvasId, chartInstance, labels, values, colors, label, max, min = 0, stepSize = null) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            if (ramChart) {
+                chartInstance.data.labels = labels;
+                chartInstance.data.datasets[0].data = values;
+                chartInstance.data.datasets[0].backgroundColor = colors;
+                chartInstance.update();
+            } else {
+                ramChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: values,
+                            backgroundColor: colors,
+                            borderColor: 'black',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Endpoints'
+                                },
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: label
+                                },
+                                beginAtZero: true,
+                                min: min,
+                                max: max,
+                                ticks: stepSize ? { stepSize: stepSize } : {}
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        ramfetchAndUpdate();
+        setInterval(ramfetchAndUpdate, 1000);
+
+                
+    </script>
+</body>
+</html>

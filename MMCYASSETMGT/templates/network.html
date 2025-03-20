@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Performance</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        canvas {
+            max-width: 600px;
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <canvas id="sentChart"></canvas>
+        <canvas id="receiveChart"></canvas>
+    </div>
+    <script>
+        let sentbytesChart = null;
+        let receivebytesChart = null;
+
+        function fetchAndUpdate() {
+            fetch("/api/performance/")
+            .then(response => response.json())
+            .then(data => {
+                const labels = data.map(item => item.id);
+                
+                // CPU Usage
+                const sent_bytes_value = data.map(item => item.sent_bytes);
+                const sentcolors = sent_bytes_value.map(value => value < 50 ? 'green' : value <= 80 ? 'orange' : 'red');
+                updateChart("sentChart", sentbytesChart, labels, sent_bytes_value, sentcolors, "Sent Bytes (%)");
+                
+                // RAM Usage
+                const receive_bytes_values = data.map(item => item.receive_bytes);
+                const receivecolors = receive_bytes_values.map(value => value < 1000 ? 'red' : 'green');
+                updateChart("receiveChart", receivebytesChart, labels, receive_bytes_values, receivecolors, "Received bytes (bytes)");
+                
+            })
+            .catch(error => console.error('Error fetching data:', error));
+        }
+
+        function updateChart(canvasId, chartInstance, labels, values, colors, label, max, min = 0, stepSize = null) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            if (chartInstance) {
+                chartInstance.data.labels = labels;
+                chartInstance.data.datasets[0].data = values;
+                chartInstance.data.datasets[0].backgroundColor = colors;
+                chartInstance.update();
+            } else {
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: values,
+                            backgroundColor: colors,
+                            borderColor: 'black',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Endpoints'
+                                },
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: label
+                                },
+                                beginAtZero: true,
+                                min: min,
+                                max: max,
+                                ticks: stepSize ? { stepSize: stepSize } : {}
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        fetchAndUpdate();
+        setInterval(fetchAndUpdate, 1000);
+    </script>
+</body>
+</html>
