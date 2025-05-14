@@ -1,0 +1,80 @@
+
+
+<div class="container-fluid mx-auto p-4 table-responsive" id="table">
+    <table class="table table-hover border-0">
+        <thead class="table-dark border-0 border-bottom-2">
+            <tr class="bg-gray-100">
+                <th class="p-2 border-bottom-2">ID</th>
+                <th class="p-2 border-bottom-2">Hostname</th>
+                <th class="p-2 border-bottom-2">OS</th>
+                <th class="p-2 border-bottom-2">RAM</th>
+                <th class="p-2 border-bottom-2">Local Disk</th>
+                <th class="p-2 border-bottom-2">CPU</th>
+                <th class="p-2 border-bottom-2">Vendor</th>
+                <th class="p-2 border-bottom-2">Serial Number</th>
+                <th class="p-2 border-bottom-2">Model</th>
+                <th class="p-2 border-bottom-2">Domain</th>
+                <th class="p-2 border-bottom-2">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for device in devices %}
+            <tr class="hover:bg-sucess row-hover cursor-pointer" data-id="{{ device.id }}">
+                
+                <td class="p-2 border-bottom border-top"><a href="{% url 'device-detail' device.id %}" class="btn btn-warning stretched-link">{{ device.id}}</li></td>
+                
+                <td class="p-2 border-bottom border-top ">{{ device.hostname|slice:"1:-1"  }}</td>
+                <td class="p-2 border-bottom border-top">{{ device.os|slice:"1:-1"   }}</td>
+                <td class="p-2 border-bottom border-top">{{ device.ram|slice:"1:-1"   }}</td>
+                <td class="p-2 border-bottom border-top">{{ device.local_disk|slice:"1:-1"   }}</td>
+                <td class="p-2 border-bottom border-top ">{{ device.cpu |slice:"1:-1"  }}</td>
+                <td class="p-2 border-bottom border-top ">{{ device.vendor|slice:"1:-1"   }}</td>
+                <td class="p-2 border-bottom border-top">{{ device.serial_number |slice:"1:-1"  }}</td>
+                <td class="p-2 border-bottom border-top">{{ device.model|slice:"1:-1"   }}</td>
+                <td class="p-2 border-bottom border-top">{{ device.domain|slice:"1:-1"   }}</td>
+                <td class="p-2 border-bottom border-top">
+                    <button class="btn btn-secondary" data-bs-toggle="dropdown" aria-expanded="false">
+                        ...
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" hx-get="{% url 'device-detail' device.id %}" hx-target="#table">detail</li>
+                        <li><a class="dropdown-item" hx-get="{% url 'device-detail' device.id %}" hx-target="#table">Edit</a></li>
+                        <li><a class="dropdown-item" hx-get="{% url 'device-detail' device.id %}" hx-target="#table">Delete</a></li>
+                    </ul>
+                </td>
+            </tr>
+       
+            {% endfor %}
+
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // JavaScript to Show Tabs based on Action
+    function showTabs(action, deviceId) {
+        // Hide the table
+        document.querySelector('.table').style.display = 'none';
+
+        // Show the tab container
+        document.getElementById('device-tabs-container').style.display = 'block';
+
+        // Set the device ID placeholder
+        document.getElementById('device-id-placeholder').textContent = deviceId;
+
+        // Change Tab Based on Action
+        if (action === 'details') {
+            var detailsTab = new bootstrap.Tab(document.getElementById('hardware-specs-tab'));
+            detailsTab.show();
+        } else if (action === 'edit') {
+            var editTab = new bootstrap.Tab(document.getElementById('patches-tab'));
+            editTab.show();
+        } else if (action === 'delete') {
+            var deleteTab = new bootstrap.Tab(document.getElementById('vulnerabilities-tab'));
+            deleteTab.show();
+        }
+    }
+</script>
+
+
+

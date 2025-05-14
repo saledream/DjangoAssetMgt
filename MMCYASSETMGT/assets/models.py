@@ -106,14 +106,41 @@ class CapacityManagement(models.Model):
     def __str__(self):
         return f"{self.machostname} - {self.timestamp}"
     
+class WindowUpdateHistory(models.Model):
+    hotfixid = models.CharField(max_length=50,unique=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    release_date = models.DateField()
+    os_build = models.CharField(max_length=100, null=True,blank=True)
 
-class PatchManagement(models.Model):
+    category = models.CharField(
+        max_length=50,
+        choices=[
+            ('Security','Security'),
+            ("Feature",'Feature'),
+            ("Bug Fix","Bug Fix"),
+            ("Cumulative",'Cumulative Updates'),
+            ('other','Other'),
+        ]
+    )
+    affected_os = models.TextField()
+    download_link = models.URLField(blank=True, null=True) 
+
+    class Meta:
+         ordering = ['-release_date']
+
+    def __str__(self):
+        return f"{self.hotfixid} - {self.hotfixid}"
+
+
+class Patching(models.Model):
+    device_id = models.CharField(max_length=1000, blank=True, null=True)
     Laptop = models.ForeignKey('Laptop', on_delete=models.CASCADE)
-    patch_name = models.CharField(max_length=100)
-    patch_status = models.CharField(max_length=100)
-    patch_date = models.CharField(max_length=100)
-    missing_patches = models.CharField(max_length=100)
-    installed_patches = models.CharField(max_length=100)
+    hotfixid = models.CharField(max_length=100, blank=True, null=True)
+    description = models.CharField(max_length=100,blank=True, null=True)
+    installedOn = models.CharField(max_length=1000,blank=True, null=True)
+    class Meta:
+         unique_together = ('Laptop','device_id','hotfixid','description','installedOn')
 
 class Monitor(models.Model):
     Laptop = models.ForeignKey('Laptop', on_delete=models.CASCADE)

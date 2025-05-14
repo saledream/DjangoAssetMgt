@@ -31,7 +31,7 @@
      </style>
 {% endblock %}
 {% block content %}
-   <section class="stage bg-dark text-white text-center py-3">
+   <section class="stage bg-dark text-white text-center py-3 ">
       <div id="chart-container"
            hx-get="{% url 'performance' %}"
            hx-trigger="load"
@@ -43,7 +43,7 @@
    <section>
       <div id="device-list-container content"
            hx-trigger="load"
-           hx-target="#chart-container"
+           hx-get="{% url 'devices-list' %}"
            hx-swap="outerHTML">
              <p> Loading devices </p>
            </div>

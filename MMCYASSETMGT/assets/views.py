@@ -7,7 +7,7 @@ from django.db import transaction
 from rest_framework import status
 from rest_framework.response import Response
 
-from .models import Employee, RunningProcess, InstalledSoftware, Port, Vulnerable_softwares, Vulnerability, Threat, DevicePerformance, PatchManagement, Laptop, Monitor, Keyboard, Mouse, Headset, DockingStation, UsbFlashDrive, DevicePerformanceHistory
+from .models import Employee, RunningProcess, InstalledSoftware, Port, Vulnerable_softwares, Vulnerability, Threat, DevicePerformance, Patching, Laptop, Monitor, Keyboard, Mouse, Headset, DockingStation, UsbFlashDrive, DevicePerformanceHistory
 from .serializer import EmployeeSerializer, RunningProcessSerializer, InstalledSoftwareSerializer, PortSerializer, Vulnerable_softwaresSerializer, VulnerabilitySerializer, ThreatSerializer, PerformanceSerializer, PatchManagementSerializer, LaptopSerializer, MonitorSerializer, KeyboardSerializer, MouseSerializer, HeadsetSerializer, DockingStationSerializer, UsbFlashDriveSerializer
 # Create your views here.
 
@@ -89,7 +89,7 @@ class PerformanceView(viewsets.ModelViewSet):
     #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class PatchManagementView(viewsets.ModelViewSet):
-    queryset = PatchManagement.objects.all()
+    queryset = Patching.objects.all()
     serializer_class = PatchManagementSerializer    
 
 class EmployeeView(viewsets.ModelViewSet):

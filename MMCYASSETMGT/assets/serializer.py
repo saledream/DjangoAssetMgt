@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from .models import Employee, Laptop, Monitor, Keyboard, Mouse, Headset, DockingStation, UsbFlashDrive, PatchManagement, InstalledSoftware, Port,RunningProcess, Vulnerable_softwares, Vulnerability,DevicePerformance, Threat, DevicePerformanceHistory
+from .models import Employee, Laptop, Monitor, Keyboard, Mouse, Headset, DockingStation, UsbFlashDrive, Patching, InstalledSoftware, Port,RunningProcess, Vulnerable_softwares, Vulnerability,DevicePerformance, Threat, DevicePerformanceHistory
 from rest_framework.response import Response
 from rest_framework import status
-
+from rest_framework.exceptions import ValidationError
 class LaptopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Laptop
@@ -51,8 +51,48 @@ class UsbFlashDriveSerializer(serializers.ModelSerializer):
 
 class PatchManagementSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PatchManagement
-        fields = '__all__'
+        model = Patching
+        fields = ['device_id','hotfixid','description','installedOn']
+
+   
+    def create(self, validated_data):
+        #request = self.context.get('request',None) 
+        print(f"data: {validated_data}")
+        device_id = validated_data.pop('device_id')
+        hotfixid = validated_data.pop('hotfixid')
+        description = validated_data.pop('description')
+        installedOn = validated_data.pop('installedOn')
+
+
+        print(device_id)
+        # fetch or create the relaed Lptop instance
+        laptop, _ = Laptop.objects.get_or_create(id=device_id)
+        validated_data['device_id'] = device_id
+        validated_data['Laptop'] = laptop
+
+        exists = Patching.objects.filter(
+            device_id=device_id,
+            Laptop = laptop,
+            hotfixid=hotfixid,
+            description=description,
+            installedOn=installedOn
+        ).exists()
+
+        if exists:
+            print(f"already existc hotfixid: {hotfixid} device id :{device_id}")
+            raise ValidationError(f"already exist")
+        
+        print("Over here right")
+        validated_data.update({
+            "device_id": device_id,
+            "Laptop": laptop,
+            "hotfixid": hotfixid,
+            "description": description,
+            "installedOn": installedOn
+        })
+            
+        return super().create(validated_data)
+       
 
 class InstalledSoftwareSerializer(serializers.ModelSerializer):
     class Meta:
